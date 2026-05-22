@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="英语国际音标(IPA)学习网站 - 包含48个音标，支持英音和美音发音对比，提供标准发音示例和详细发音技巧">
+  <meta name="keywords" content="英语音标, IPA, 国际音标, 英式发音, 美式发音, 英语学习, 音标学习">
+  <meta name="author" content="IPA Learning">
+  <meta name="robots" content="index, follow">
+  
+  <meta property="og:title" content="英语国际音标学习 - 48个音标详解">
+  <meta property="og:description" content="专业的英语音标学习平台，支持英美发音对比，点击即可听标准发音">
+  <meta property="og:type" content="website">
+  
+  <title>英语国际音标学习 | 48个音标详解 - 英美发音对比</title>
+  
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔊</text></svg>">
+  <link rel="stylesheet" href="css/styles.css">
+  
+  <script src="js/phonemes.js" defer></script>
+  <script src="js/speech.js" defer></script>
+  <script src="js/app.js" defer></script>
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <div class="header-content">
+        <div class="logo">
+          <div class="logo-icon">IPA</div>
+          <div>
+            <div class="logo-text">英语音标学习</div>
+            <div class="logo-subtitle">International Phonetic Alphabet</div>
+          </div>
+        </div>
+        <div class="header-stats">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 20V10"></path>
+            <path d="M18 20V4"></path>
+            <path d="M6 20v-4"></path>
+          </svg>
+          <span>48个音标 · 英美双语</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="container">
+      <section class="hero">
+        <h1>掌握48个国际音标</h1>
+        <p>点击任意音标卡片，查看详细发音技巧，对比英式和美式发音差异。系统会自动记录您的学习进度。</p>
+      </section>
+
+      <div class="tabs">
+        <button class="tab-btn active" data-category="vowels">元音 (20个)</button>
+        <button class="tab-btn" data-category="consonants">辅音 (28个)</button>
+      </div>
+
+      <div class="phonemes-grid"></div>
+
+      <section class="progress-section">
+        <div class="progress-header">
+          <span class="progress-title">学习进度</span>
+          <span class="progress-percentage">0%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-bar-fill" style="width: 0%"></div>
+        </div>
+        <p class="progress-text">0 / 48 已学习</p>
+      </section>
+
+      <section class="reference-section">
+        <div class="reference-tabs">
+          <button class="reference-tab active" data-ref="differences">英美发音差异</button>
+          <button class="reference-tab" data-ref="mistakes">常见错误</button>
+        </div>
+        <div class="reference-content">
+          <div class="differences-list"></div>
+          <div class="mistakes-list hidden"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div class="modal-overlay">
+    <div class="modal-content">
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <p>点击音标卡片开始学习 · 自动保存学习进度</p>
+    </div>
+  </footer>
+
+  <script>
+    document.querySelectorAll('.reference-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.reference-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        
+        const ref = tab.dataset.ref;
+        document.querySelector('.differences-list').classList.toggle('hidden', ref !== 'differences');
+        document.querySelector('.mistakes-list').classList.toggle('hidden', ref !== 'mistakes');
+      });
+    });
+  </script>
+</body>
+</html>
