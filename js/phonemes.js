@@ -166,7 +166,7 @@ const phonemesData = {
         { word: "like", ipa: "/laɪk/" },
         { word: "time", ipa: "/taɪm/" }
       ],
-      tips: "从/ɑː/滑向/ɪ/，嘴型从张大到微收。这是英语中很常见的双元音。"
+      tips: "从较开的 /a/ 滑向 /ɪ/，嘴型从张大到微收。这是英语中很常见的双元音。"
     },
     {
       id: "vowel-15",
@@ -178,7 +178,7 @@ const phonemesData = {
         { word: "joy", ipa: "/dʒɔɪ/" },
         { word: "noise", ipa: "/nɔɪz/" }
       ],
-      tips: "从/ɔː/滑向/ɪ/，嘴型从圆唇到扁唇。注意与单元音区分。"
+      tips: "从较圆的 /ɔ/ 滑向 /ɪ/，嘴型从圆唇到扁唇。注意与单元音区分。"
     },
     {
       id: "vowel-16",
@@ -190,7 +190,7 @@ const phonemesData = {
         { word: "now", ipa: "/naʊ/" },
         { word: "out", ipa: "/aʊt/" }
       ],
-      tips: "从/ɑː/滑向/ʊ/，嘴型从张大到收圆。类似于汉字「啊乌」的连读。"
+      tips: "从较开的 /a/ 滑向 /ʊ/，嘴型从张大到收圆。类似于汉字「啊乌」的连读。"
     },
     {
       id: "vowel-17",
@@ -665,6 +665,7 @@ const phonemeAudioWords = {
 // The inventory is based on the traditional British teaching set. These
 // entries show the common General American equivalent where it differs.
 const accentSymbols = {
+  "vowel-03": { british: "e", american: "ɛ" },
   "vowel-05": { british: "ɑː", american: "ɑ" },
   "vowel-06": { british: "ɒ", american: "ɑ" },
   "vowel-07": { british: "ɔː", american: "ɔ" },
@@ -672,7 +673,8 @@ const accentSymbols = {
   "vowel-17": { british: "əʊ", american: "oʊ" },
   "vowel-18": { british: "ɪə", american: "ɪr" },
   "vowel-19": { british: "eə", american: "ɛr" },
-  "vowel-20": { british: "ʊə", american: "ʊr" }
+  "vowel-20": { british: "ʊə", american: "ʊr" },
+  "consonant-16": { british: "r", american: "ɹ" }
 };
 
 for (const phoneme of [...phonemesData.vowels, ...phonemesData.consonants]) {

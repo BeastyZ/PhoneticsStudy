@@ -45,6 +45,26 @@ assert.equal(
   '/bɝd/',
   'American bird should use a rhotic vowel'
 );
+assert.equal(
+  allPhonemes.find(phoneme => phoneme.id === 'vowel-03').accentSymbols.british,
+  'e',
+  'The dress vowel should show the British symbol'
+);
+assert.equal(
+  allPhonemes.find(phoneme => phoneme.id === 'vowel-03').accentSymbols.american,
+  'ɛ',
+  'The dress vowel should show the American symbol'
+);
+assert.equal(
+  allPhonemes.find(phoneme => phoneme.id === 'consonant-16').accentSymbols.british,
+  'r',
+  'The rhotic approximant should show the British teaching symbol'
+);
+assert.equal(
+  allPhonemes.find(phoneme => phoneme.id === 'consonant-16').accentSymbols.american,
+  'ɹ',
+  'The rhotic approximant should show its American IPA symbol'
+);
 
 const speechEvents = [];
 const fakeSpeechSynthesis = {
