@@ -182,6 +182,9 @@ body {
 }
 
 .phoneme-card {
+  appearance: none;
+  width: 100%;
+  font: inherit;
   background: var(--bg-secondary);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
@@ -208,6 +211,16 @@ body {
   transform: translateY(-4px);
   box-shadow: var(--shadow-lg);
   border-color: var(--primary);
+}
+
+.phoneme-card:focus-visible,
+.tab-btn:focus-visible,
+.reference-tab:focus-visible,
+.phoneme-play-btn:focus-visible,
+.play-btn:focus-visible,
+.modal-close:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.35);
+  outline-offset: 2px;
 }
 
 .phoneme-card.clicked {
@@ -307,6 +320,7 @@ body {
   z-index: 1000;
   opacity: 0;
   visibility: hidden;
+  pointer-events: none;
   transition: all var(--transition-normal);
   padding: 24px;
 }
@@ -314,6 +328,7 @@ body {
 .modal-overlay.active {
   opacity: 1;
   visibility: visible;
+  pointer-events: auto;
 }
 
 .modal-content {
@@ -386,6 +401,16 @@ body {
   display: flex;
   gap: 12px;
   margin-bottom: 24px;
+}
+
+.speech-note {
+  margin: -8px 0 24px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: #EFF6FF;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.6;
 }
 
 .phoneme-play-btn {

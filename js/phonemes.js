@@ -128,7 +128,7 @@ const phonemesData = {
       examples: [
         { word: "about", ipa: "/əˈbaʊt/" },
         { word: "teacher", ipa: "/ˈtiːtʃə/" },
-        { word: " banana", ipa: "/bəˈnɑːnə/" }
+        { word: "banana", ipa: "/bəˈnɑːnə/" }
       ],
       tips: "舌头自然放松，嘴巴半开，发音轻柔模糊。这是英语中最常见的元音，也叫「非重读元音」。"
     },
@@ -142,7 +142,7 @@ const phonemesData = {
         { word: "her", ipa: "/hɜː/" },
         { word: "nurse", ipa: "/nɜːs/" }
       ],
-      tips: "嘴巴微张，舌头中部抬起，嘴唇自然放松，声音拉长。卷舌音在美式英语中常见。"
+      tips: "嘴巴微张，舌头中部抬起，嘴唇自然放松，声音拉长。英式英语通常不卷舌；美式英语通常使用带卷舌的 /ɝ/。"
     },
     {
       id: "vowel-13",
@@ -540,7 +540,7 @@ const phonemesData = {
         { word: "ring", ipa: "/rɪŋ/" },
         { word: "morning", ipa: "/ˈmɔːnɪŋ/" }
       ],
-      tips: "舌根抵软腭，气流从鼻腔流出。声带振动。只出现在词尾，不会出现在词首。"
+      tips: "舌根抵住软腭，气流从鼻腔流出，声带振动。英语中常见于词中和词尾（如 singer、sing），通常不出现在本族词的词首；词尾不要再加 /ɡ/。"
     },
     {
       id: "consonant-26",
@@ -574,7 +574,7 @@ const phonemesData = {
       examples: [
         { word: "yes", ipa: "/jes/" },
         { word: "year", ipa: "/jɪə/" },
-        { word: "blue", ipa: "/bluː/" }
+        { word: "you", ipa: "/juː/" }
       ],
       tips: "舌身前部接近硬腭。声带振动。类似于汉字「呀」的辅音部分。"
     }
@@ -584,21 +584,21 @@ const phonemesData = {
 const commonMistakes = [
   { phoneme: "/θ/", mistake: "发成/s/", correct: "舌尖要伸出上下齿之间" },
   { phoneme: "/ð/", mistake: "发成/z/", correct: "舌尖要伸出上下齿之间" },
-  { phoneme: "/ŋ/", mistake: "发成/n/", correct: "舌根要抵住软腭，不是舌尖抵上齿龈" },
-  { phoneme: "/l/", mistake: "词尾省略", correct: "词尾舌头也要抵住上齿龈" },
-  { phoneme: "/r/", mistake: "发成中文「日」", correct: "舌头不要卷，只是接近上齿龈后方" },
+  { phoneme: "/ŋ/", mistake: "发成/n/或在词尾加/g/", correct: "舌根抵住软腭，气流从鼻腔通过；词尾不要再爆破/g/" },
+  { phoneme: "/l/", mistake: "词尾省略或仍发成清晰的/l/", correct: "词尾保留舌尖接触，后面的元音色彩可更暗一些" },
+  { phoneme: "/r/", mistake: "发成中文「日」或让舌尖碰到齿龈", correct: "舌尖悬空，保持近音；美式英语可卷舌，英式英语通常不卷舌" },
   { phoneme: "/v/", mistake: "下唇不咬上齿", correct: "上齿必须咬住下唇内侧" },
   { phoneme: "/w/", mistake: "发成「乌」", correct: "双唇要收圆前突快速过渡到元音" },
   { phoneme: "/æ/", mistake: "发成「啊」", correct: "嘴角要向两侧拉伸，发音位置更靠前" }
 ];
 
 const britishAmericanDifferences = [
-  { word: "car", british: "/kɑː/", american: "/kɑːr/" },
-  { word: "better", british: "/ˈbetə/", american: "/ˈbeɾər/" },
-  { word: "water", british: "/ˈwɔːtə/", american: "/ˈwɔːɾər/" },
-  { word: "butter", british: "/ˈbʌtə/", american: "/ˈbʌɾər/" },
-  { word: "bird", british: "/bɜːd/", american: "/bɜːrd/" },
-  { word: "girl", british: "/ɡɜːl/", american: "/ɡɜːrl/" },
+  { word: "car", british: "/kɑː/", american: "/kɑr/" },
+  { word: "better", british: "/ˈbetə/", american: "/ˈbɛɾɚ/" },
+  { word: "water", british: "/ˈwɔːtə/", american: "/ˈwɔɾɚ/" },
+  { word: "butter", british: "/ˈbʌtə/", american: "/ˈbʌɾɚ/" },
+  { word: "bird", british: "/bɜːd/", american: "/bɝd/" },
+  { word: "girl", british: "/ɡɜːl/", american: "/ɡɝl/" },
   { word: "class", british: "/klɑːs/", american: "/klæs/" },
   { word: "dance", british: "/dɑːns/", american: "/dæns/" },
   { word: "can't", british: "/kɑːnt/", american: "/kænt/" },
@@ -606,6 +606,82 @@ const britishAmericanDifferences = [
   { word: "privacy", british: "/ˈprɪvəsi/", american: "/ˈpraɪvəsi/" },
   { word: "vitamin", british: "/ˈvɪtəmɪn/", american: "/ˈvaɪtəmɪn/" }
 ];
+
+// SpeechSynthesis reads ordinary text, not IPA. Each phoneme therefore has a
+// short, natural example word that lets learners hear the target sound in
+// context. The UI labels these buttons as example-word playback so it does
+// not imply that a browser can synthesize an isolated phoneme.
+const phonemeAudioWords = {
+  "vowel-01": "see",
+  "vowel-02": "sit",
+  "vowel-03": "bed",
+  "vowel-04": "cat",
+  "vowel-05": "father",
+  "vowel-06": "hot",
+  "vowel-07": "thought",
+  "vowel-08": "put",
+  "vowel-09": "food",
+  "vowel-10": "cup",
+  "vowel-11": "about",
+  "vowel-12": "bird",
+  "vowel-13": "day",
+  "vowel-14": "my",
+  "vowel-15": "boy",
+  "vowel-16": "how",
+  "vowel-17": "go",
+  "vowel-18": "here",
+  "vowel-19": "hair",
+  "vowel-20": "tour",
+  "consonant-01": "pen",
+  "consonant-02": "book",
+  "consonant-03": "tea",
+  "consonant-04": "day",
+  "consonant-05": "key",
+  "consonant-06": "go",
+  "consonant-07": "fish",
+  "consonant-08": "very",
+  "consonant-09": "think",
+  "consonant-10": "this",
+  "consonant-11": "see",
+  "consonant-12": "zoo",
+  "consonant-13": "she",
+  "consonant-14": "measure",
+  "consonant-15": "hello",
+  "consonant-16": "red",
+  "consonant-17": "chat",
+  "consonant-18": "job",
+  "consonant-19": "tree",
+  "consonant-20": "drink",
+  "consonant-21": "cats",
+  "consonant-22": "beds",
+  "consonant-23": "man",
+  "consonant-24": "no",
+  "consonant-25": "sing",
+  "consonant-26": "let",
+  "consonant-27": "we",
+  "consonant-28": "yes"
+};
+
+// The inventory is based on the traditional British teaching set. These
+// entries show the common General American equivalent where it differs.
+const accentSymbols = {
+  "vowel-05": { british: "ɑː", american: "ɑ" },
+  "vowel-06": { british: "ɒ", american: "ɑ" },
+  "vowel-07": { british: "ɔː", american: "ɔ" },
+  "vowel-12": { british: "ɜː", american: "ɝ" },
+  "vowel-17": { british: "əʊ", american: "oʊ" },
+  "vowel-18": { british: "ɪə", american: "ɪr" },
+  "vowel-19": { british: "eə", american: "ɛr" },
+  "vowel-20": { british: "ʊə", american: "ʊr" }
+};
+
+for (const phoneme of [...phonemesData.vowels, ...phonemesData.consonants]) {
+  phoneme.audioWord = phonemeAudioWords[phoneme.id];
+  phoneme.accentSymbols = accentSymbols[phoneme.id] || {
+    british: phoneme.symbol,
+    american: phoneme.symbol
+  };
+}
 
 window.phonemesData = phonemesData;
 window.commonMistakes = commonMistakes;

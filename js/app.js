@@ -3,6 +3,7 @@ class IPALearningApp {
     this.currentCategory = 'vowels';
     this.learnedPhonemes = new Set();
     this.isPlaying = false;
+    this.lastFocusedElement = null;
     this.init();
   }
 
@@ -20,7 +21,11 @@ class IPALearningApp {
       const saved = localStorage.getItem('ipa-progress');
       if (saved) {
         const data = JSON.parse(saved);
-        this.learnedPhonemes = new Set(data.learnedPhonemes || []);
+        const validIds = new Set(this.getAllPhonemes().map(phoneme => phoneme.id));
+        this.learnedPhonemes = new Set(
+          (Array.isArray(data.learnedPhonemes) ? data.learnedPhonemes : [])
+            .filter(phonemeId => validIds.has(phonemeId))
+        );
       }
     } catch (e) {
       console.warn('Failed to load progress:', e);
@@ -48,28 +53,48 @@ class IPALearningApp {
   }
 
   updateProgress() {
-    const total = window.phonemesData.vowels.length + window.phonemesData.consonants.length;
-    const learned = this.learnedPhonemes.size;
+    const total = this.getAllPhonemes().length;
+    const validIds = new Set(this.getAllPhonemes().map(phoneme => phoneme.id));
+    const learned = [...this.learnedPhonemes].filter(phonemeId => validIds.has(phonemeId)).length;
     const percentage = Math.round((learned / total) * 100);
 
-    document.querySelector('.progress-text').textContent = `${learned} / ${total} 已学习`;
-    document.querySelector('.progress-bar-fill').style.width = `${percentage}%`;
-    document.querySelector('.progress-percentage').textContent = `${percentage}%`;
+    const progressText = document.querySelector('.progress-text');
+    const progressBar = document.querySelector('.progress-bar-fill');
+    const progressPercentage = document.querySelector('.progress-percentage');
+    if (progressText) progressText.textContent = `${learned} / ${total} 已学习`;
+    if (progressBar) progressBar.style.width = `${percentage}%`;
+    if (progressPercentage) progressPercentage.textContent = `${percentage}%`;
   }
 
   updatePhonemeCard(phonemeId) {
     const card = document.querySelector(`[data-phoneme-id="${phonemeId}"]`);
     if (card) {
-      if (this.learnedPhonemes.has(phonemeId)) {
-        card.classList.add('learned');
+      const isLearned = this.learnedPhonemes.has(phonemeId);
+      card.classList.toggle('learned', isLearned);
+      card.setAttribute('aria-pressed', String(isLearned));
+      if (isLearned && !card.querySelector('.learned-badge')) {
+        card.insertAdjacentHTML('beforeend', '<span class="learned-badge">已学</span>');
       }
     }
+  }
+
+  getAllPhonemes() {
+    return [...window.phonemesData.vowels, ...window.phonemesData.consonants];
+  }
+
+  escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 
   setupEventListeners() {
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
-        const category = e.target.dataset.category;
+        const category = e.currentTarget.dataset.category;
         this.switchCategory(category);
       });
     });
@@ -100,8 +125,9 @@ class IPALearningApp {
       if (e.target.closest('.phoneme-play-btn')) {
         const btn = e.target.closest('.phoneme-play-btn');
         const symbol = btn.dataset.symbol;
+        const word = btn.dataset.word;
         const accent = btn.dataset.accent;
-        this.playPhoneme(symbol, accent, btn);
+        this.playPhoneme(symbol, accent, word, btn);
       }
     });
 
@@ -128,15 +154,22 @@ class IPALearningApp {
       ? window.phonemesData.vowels 
       : window.phonemesData.consonants;
 
-    container.innerHTML = phonemes.map((phoneme, index) => `
-      <div class="phoneme-card ${this.learnedPhonemes.has(phoneme.id) ? 'learned' : ''}" 
-           data-phoneme-id="${phoneme.id}"
-           style="animation-delay: ${index * 30}ms">
-        <span class="phoneme-symbol">/${phoneme.symbol}/</span>
-        <span class="phoneme-name">${phoneme.subcategory}</span>
-        ${this.learnedPhonemes.has(phoneme.id) ? '<span class="learned-badge">已学</span>' : ''}
-      </div>
-    `).join('');
+    container.innerHTML = phonemes.map((phoneme, index) => {
+      const isLearned = this.learnedPhonemes.has(phoneme.id);
+      const symbol = this.escapeHtml(phoneme.symbol);
+      const name = this.escapeHtml(phoneme.subcategory);
+      return `
+        <button type="button" class="phoneme-card ${isLearned ? 'learned' : ''}"
+             data-phoneme-id="${this.escapeHtml(phoneme.id)}"
+             aria-label="学习音标 /${symbol}/"
+             aria-pressed="${isLearned}"
+             style="animation-delay: ${index * 30}ms">
+          <span class="phoneme-symbol">/${symbol}/</span>
+          <span class="phoneme-name">${name}</span>
+          ${isLearned ? '<span class="learned-badge">已学</span>' : ''}
+        </button>
+      `;
+    }).join('');
 
     container.querySelectorAll('.phoneme-card').forEach(card => {
       card.addEventListener('click', () => {
@@ -147,8 +180,7 @@ class IPALearningApp {
   }
 
   openDetailModal(phonemeId) {
-    const phonemes = [...window.phonemesData.vowels, ...window.phonemesData.consonants];
-    const phoneme = phonemes.find(p => p.id === phonemeId);
+    const phoneme = this.getAllPhonemes().find(p => p.id === phonemeId);
     
     if (!phoneme) return;
 
@@ -156,9 +188,17 @@ class IPALearningApp {
 
     const modal = document.querySelector('.modal-overlay');
     const modalContent = modal.querySelector('.modal-content');
+    this.lastFocusedElement = document.activeElement;
+
+    const symbol = this.escapeHtml(phoneme.symbol);
+    const name = this.escapeHtml(phoneme.name);
+    const categoryName = this.escapeHtml(this.getCategoryName(phoneme.subcategory));
+    const audioWord = this.escapeHtml(phoneme.audioWord);
+    const britishSymbol = this.escapeHtml(phoneme.accentSymbols.british);
+    const americanSymbol = this.escapeHtml(phoneme.accentSymbols.american);
 
     modalContent.innerHTML = `
-      <button class="modal-close">
+      <button type="button" class="modal-close" aria-label="关闭音标详情">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -166,45 +206,48 @@ class IPALearningApp {
       </button>
       
       <div class="modal-header">
-        <div class="modal-phoneme-symbol">/${phoneme.symbol}/</div>
-        <div class="modal-phoneme-name">${phoneme.name}</div>
-        <div class="modal-phoneme-category">${this.getCategoryName(phoneme.subcategory)}</div>
+        <div class="modal-phoneme-symbol">/${symbol}/</div>
+        <h2 id="modal-title" class="modal-phoneme-name">${name}</h2>
+        <div class="modal-phoneme-category">${categoryName}</div>
       </div>
 
       <div class="modal-phoneme-play">
-        <button class="phoneme-play-btn primary" data-symbol="${phoneme.symbol}" data-accent="british">
+        <button type="button" class="phoneme-play-btn primary" data-symbol="${symbol}" data-word="${audioWord}" data-accent="british" title="播放包含该音的英式示例词">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
             <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
           </svg>
-          英音发音
+          英音示例词
         </button>
-        <button class="phoneme-play-btn secondary" data-symbol="${phoneme.symbol}" data-accent="american">
+        <button type="button" class="phoneme-play-btn secondary" data-symbol="${symbol}" data-word="${audioWord}" data-accent="american" title="播放包含该音的美式示例词">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
             <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
           </svg>
-          美音发音
+          美音示例词
         </button>
       </div>
 
+      <p class="speech-note">浏览器语音合成不能直接朗读 IPA；上方按钮会慢速播放包含 /${symbol}/ 的示例词「${audioWord}」。</p>
+
       <div class="modal-section">
         <h3>发音技巧</h3>
-        <p class="tips-text">${phoneme.tips}</p>
+        <p class="tips-text">${this.escapeHtml(phoneme.tips)}</p>
       </div>
 
       <div class="modal-section">
         <h3>单词示例</h3>
+        <p class="difference-note">示例转写采用英式教学体系；UK / US 按钮会播放对应口音。</p>
         <div class="examples-list">
           ${phoneme.examples.map(ex => `
             <div class="example-item">
-              <span class="example-word">${ex.word}</span>
-              <span class="example-ipa">${ex.ipa}</span>
+              <span class="example-word">${this.escapeHtml(ex.word)}</span>
+              <span class="example-ipa">${this.escapeHtml(ex.ipa)}</span>
               <div class="example-buttons">
-                <button class="play-btn small" data-word="${ex.word}" data-accent="british" title="英音">
+                <button type="button" class="play-btn small" data-word="${this.escapeHtml(ex.word)}" data-accent="british" title="播放英式发音">
                   <span class="accent-label">UK</span>
                 </button>
-                <button class="play-btn small" data-word="${ex.word}" data-accent="american" title="美音">
+                <button type="button" class="play-btn small" data-word="${this.escapeHtml(ex.word)}" data-accent="american" title="播放美式发音">
                   <span class="accent-label">US</span>
                 </button>
               </div>
@@ -219,12 +262,12 @@ class IPALearningApp {
         <div class="accent-comparison">
           <div class="accent-item">
             <span class="accent-badge british">英式</span>
-            <span class="accent-example">/${phoneme.symbol}/</span>
+            <span class="accent-example">/${britishSymbol}/</span>
           </div>
           <div class="accent-divider">vs</div>
           <div class="accent-item">
             <span class="accent-badge american">美式</span>
-            <span class="accent-example">/${phoneme.symbol}/</span>
+            <span class="accent-example">/${americanSymbol}/</span>
           </div>
         </div>
       </div>
@@ -232,6 +275,7 @@ class IPALearningApp {
 
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
+    modalContent.querySelector('.modal-close')?.focus();
   }
 
   closeModal() {
@@ -239,22 +283,24 @@ class IPALearningApp {
     modal.classList.remove('active');
     document.body.style.overflow = '';
     window.speechService.stop();
+    this.isPlaying = false;
+    this.lastFocusedElement?.focus?.();
   }
 
-  async playPhoneme(symbol, accent, btn) {
+  async playPhoneme(symbol, accent, word, btn) {
     if (this.isPlaying) return;
     
     this.isPlaying = true;
     btn.classList.add('playing');
     
     try {
-      await window.speechService.speakPhoneme(symbol, accent);
+      await window.speechService.speakPhoneme(symbol, accent, word);
     } catch (e) {
       console.error('Failed to play phoneme:', e);
+    } finally {
+      this.isPlaying = false;
+      btn.classList.remove('playing');
     }
-    
-    this.isPlaying = false;
-    btn.classList.remove('playing');
   }
 
   async playWord(word, accent, btn) {
@@ -267,10 +313,10 @@ class IPALearningApp {
       await window.speechService.speakWord(word, accent);
     } catch (e) {
       console.error('Failed to play word:', e);
+    } finally {
+      this.isPlaying = false;
+      btn.classList.remove('playing');
     }
-    
-    this.isPlaying = false;
-    btn.classList.remove('playing');
   }
 
   getCategoryName(subcategory) {
